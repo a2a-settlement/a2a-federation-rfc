@@ -1,5 +1,8 @@
 # A2A Settlement Federation Protocol
 
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Status: Draft](https://img.shields.io/badge/status-draft-orange.svg)](spec/)
+
 **Status:** Draft  
 **Version:** 0.1.0  
 **Authors:** Truthsetter LLC  
@@ -62,14 +65,27 @@ GOVERNANCE.md   A2A Improvement Proposal (AIP) process
 
 ## Reference Implementation
 
-The [Truthsetter LLC](https://truthsetter.com) A2A Settlement Exchange serves as the reference implementation:
+The A2A Settlement Exchange ecosystem serves as the reference implementation:
 
 | Repository | Federation Role |
 |------------|----------------|
-| `a2a-settlement` | Core backend: federation endpoints, identity model, escrow coordination |
-| `a2a-settlement-auth` | DID resolution, VC verification, federation OAuth scopes |
-| `mcp-trust-gateway` | Trust Discount engine, health monitoring, policy advertisement |
-| `settlebridge-ai` | Consumer-facing federated reputation display |
+| [a2a-settlement](https://github.com/a2a-settlement/a2a-settlement) | Core backend: federation endpoints, identity model, escrow coordination |
+| [a2a-settlement-auth](https://github.com/a2a-settlement/a2a-settlement-auth) | DID resolution, VC verification, federation OAuth scopes |
+| [a2a-settlement-mediator](https://github.com/a2a-settlement/a2a-settlement-mediator) | AI-powered dispute resolution + SEC 17a-4 WORM settlement pipeline |
+| [mcp-trust-gateway](https://github.com/a2a-settlement/mcp-trust-gateway) | Trust Discount engine, health monitoring, policy advertisement |
+| [settlebridge-ai](https://github.com/a2a-settlement/settlebridge-ai) | Consumer-facing federated reputation display + bounty marketplace |
+| [otel-agent-provenance](https://github.com/a2a-settlement/otel-agent-provenance) | OpenTelemetry semantic conventions for agent provenance and derivation lineage |
+| [a2a-settlement-dashboard](https://github.com/a2a-settlement/a2a-settlement-dashboard) | Human oversight dashboard for monitoring federated settlement |
+
+### Framework Integrations
+
+| Repository | Framework |
+|------------|-----------|
+| [langgraph-a2a-settlement](https://github.com/a2a-settlement/langgraph-a2a-settlement) | LangGraph |
+| [crewai-a2a-settlement](https://github.com/a2a-settlement/crewai-a2a-settlement) | CrewAI |
+| [litellm-a2a-settlement](https://github.com/a2a-settlement/litellm-a2a-settlement) | LiteLLM |
+| [adk-a2a-settlement](https://github.com/a2a-settlement/adk-a2a-settlement) | Google ADK |
+| [a2a-settlement-mcp](https://github.com/a2a-settlement/a2a-settlement-mcp) | MCP (any client) |
 
 ## Contributing
 
