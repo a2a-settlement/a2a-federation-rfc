@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/peering-request.json",
+  "title": "PeeringRequest",
+  "description": "Signed request from an initiating exchange to establish a federation peering relationship.",
+  "type": "object",
+  "required": ["type", "initiator", "capability_manifest", "trust_discount_policy", "timestamp", "nonce", "proof"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "PeeringRequest"
+    },
+    "initiator": {
+      "type": "object",
+      "required": ["did", "name", "operator"],
+      "properties": {
+        "did": {
+          "type": "string",
+          "pattern": "^did:.+$",
+          "description": "DID of the initiating exchange."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the exchange."
+        },
+        "operator": {
+          "type": "string",
+          "description": "Legal entity operating the exchange."
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_manifest": {
+      "$ref": "capability-manifest.json"
+    },
+    "trust_discount_policy": {
+      "$ref": "trust-discount-policy.json"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Request creation time. Must be within ±5 minutes of receiver's clock."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 32,
+      "description": "Unique nonce for replay protection (256-bit hex recommended)."
+    },
+    "proof": {
+      "type": "object",
+      "required": ["type", "verificationMethod", "proofValue"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Ed25519Signature2020"
+        },
+        "verificationMethod": {
+          "type": "string",
+          "description": "DID URL of the signing key."
+        },
+        "proofValue": {
+          "type": "string",
+          "description": "Base58btc-encoded Ed25519 signature over the request payload."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

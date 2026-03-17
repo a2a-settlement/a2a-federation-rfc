@@ -1,0 +1,104 @@
+{
+  "algorithm": "urn:a2a:trust:discount:step-function-v1",
+  "description": "Test vectors for the Step Function v1 Trust Discount algorithm.",
+  "parameters": {
+    "steps": [
+      { "min_age_days": 7, "min_volume_ate": 100, "min_tx_count": 5, "rho": 0.10 },
+      { "min_age_days": 30, "min_volume_ate": 1000, "min_tx_count": 25, "rho": 0.25 },
+      { "min_age_days": 90, "min_volume_ate": 5000, "min_tx_count": 100, "rho": 0.50 },
+      { "min_age_days": 180, "min_volume_ate": 25000, "min_tx_count": 500, "rho": 0.75 },
+      { "min_age_days": 365, "min_volume_ate": 100000, "min_tx_count": 2000, "rho": 0.90 }
+    ],
+    "attestation_success_floor": 0.95
+  },
+  "vectors": [
+    {
+      "id": "sf-001",
+      "description": "All inputs zero → rho must be 0.0",
+      "inputs": {
+        "federation_age_days": 0,
+        "cross_exchange_volume_ate": 0.0,
+        "cross_exchange_tx_count": 0,
+        "attestation_success_rate": 1.0
+      },
+      "expected_rho": 0.0
+    },
+    {
+      "id": "sf-002",
+      "description": "Just reached first step",
+      "inputs": {
+        "federation_age_days": 7,
+        "cross_exchange_volume_ate": 100.0,
+        "cross_exchange_tx_count": 5,
+        "attestation_success_rate": 0.99
+      },
+      "expected_rho": 0.10
+    },
+    {
+      "id": "sf-003",
+      "description": "Between step 1 and 2 — age met but volume not",
+      "inputs": {
+        "federation_age_days": 30,
+        "cross_exchange_volume_ate": 500.0,
+        "cross_exchange_tx_count": 25,
+        "attestation_success_rate": 0.98
+      },
+      "expected_rho": 0.10
+    },
+    {
+      "id": "sf-004",
+      "description": "Step 2 reached",
+      "inputs": {
+        "federation_age_days": 30,
+        "cross_exchange_volume_ate": 1000.0,
+        "cross_exchange_tx_count": 25,
+        "attestation_success_rate": 0.97
+      },
+      "expected_rho": 0.25
+    },
+    {
+      "id": "sf-005",
+      "description": "Step 3 — volume met but tx_count not met",
+      "inputs": {
+        "federation_age_days": 90,
+        "cross_exchange_volume_ate": 5000.0,
+        "cross_exchange_tx_count": 99,
+        "attestation_success_rate": 0.96
+      },
+      "expected_rho": 0.25
+    },
+    {
+      "id": "sf-006",
+      "description": "Step 3 fully met",
+      "inputs": {
+        "federation_age_days": 90,
+        "cross_exchange_volume_ate": 5000.0,
+        "cross_exchange_tx_count": 100,
+        "attestation_success_rate": 0.96
+      },
+      "expected_rho": 0.50
+    },
+    {
+      "id": "sf-007",
+      "description": "Highest step reached",
+      "inputs": {
+        "federation_age_days": 365,
+        "cross_exchange_volume_ate": 100000.0,
+        "cross_exchange_tx_count": 2000,
+        "attestation_success_rate": 0.97
+      },
+      "expected_rho": 0.90
+    },
+    {
+      "id": "sf-008",
+      "description": "High volume but attestation below floor → rho = 0",
+      "inputs": {
+        "federation_age_days": 365,
+        "cross_exchange_volume_ate": 100000.0,
+        "cross_exchange_tx_count": 2000,
+        "attestation_success_rate": 0.94
+      },
+      "expected_rho": 0.0
+    }
+  ]
+}

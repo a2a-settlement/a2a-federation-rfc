@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/evidence-attestation-vc.json",
+  "title": "EvidenceAttestation",
+  "description": "W3C Verifiable Credential asserting that evidence was evaluated and found sufficient without revealing the evidence itself. Preserves the Economic Air Gap across federation boundaries.",
+  "type": "object",
+  "required": ["@context", "type", "id", "issuer", "validFrom", "credentialSubject", "proof"],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "https://www.w3.org/ns/credentials/v2" }
+    },
+    "type": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "EvidenceAttestation" }
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^did:.+$"
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "credentialSubject": {
+      "type": "object",
+      "required": ["id", "taskId", "evaluationOutcome", "evaluatorType", "evidenceHash", "evaluatedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:.+$",
+          "description": "DID of the agent whose evidence was evaluated."
+        },
+        "taskId": {
+          "type": "string",
+          "description": "URN of the task or bounty evaluated.",
+          "examples": ["urn:a2a:task:bounty-12345"]
+        },
+        "evaluationOutcome": {
+          "type": "string",
+          "enum": ["sufficient", "insufficient", "partial"],
+          "description": "Evaluation result."
+        },
+        "evaluatorType": {
+          "type": "string",
+          "enum": ["ai-mediator", "human-arbitrator", "automated"],
+          "description": "Type of evaluator that assessed the evidence."
+        },
+        "evidenceHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the evidence bundle for binding without disclosure."
+        },
+        "evaluatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the evaluation occurred."
+        },
+        "evidenceArtifactCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of evidence artifacts in the bundle."
+        },
+        "evaluationDurationMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How long the evaluation took in milliseconds."
+        }
+      },
+      "additionalProperties": false
+    },
+    "proof": {
+      "type": "object",
+      "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
+      "properties": {
+        "type": { "type": "string", "const": "Ed25519Signature2020" },
+        "created": { "type": "string", "format": "date-time" },
+        "verificationMethod": { "type": "string" },
+        "proofPurpose": { "type": "string", "const": "assertionMethod" },
+        "proofValue": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

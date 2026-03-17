@@ -1,0 +1,154 @@
+{
+  "description": "Test vectors for the /federation/peer handshake protocol.",
+  "vectors": [
+    {
+      "id": "peer-001",
+      "description": "Successful bilateral peering between two exchanges",
+      "request": {
+        "type": "PeeringRequest",
+        "initiator": {
+          "did": "did:web:exchange-a.example.org",
+          "name": "Exchange A",
+          "operator": "Operator A LLC"
+        },
+        "capability_manifest": {
+          "node_did": "did:web:exchange-a.example.org",
+          "supported_assets": ["a2a:ledger:ate"],
+          "attestation_types": ["IdentityAttestation", "ReputationAttestation", "TransactionAttestation"],
+          "policy_uri": "https://exchange-a.example.org/.well-known/a2a-trust-policy.json",
+          "endpoints": {
+            "verify": "https://exchange-a.example.org/federation/verify",
+            "peer": "https://exchange-a.example.org/federation/peer",
+            "health": "https://exchange-a.example.org/.well-known/a2a-federation-health",
+            "attestation_import": "https://exchange-a.example.org/federation/attestation/import"
+          }
+        },
+        "trust_discount_policy": {
+          "algorithm_id": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+          "initial_rho": 0.15,
+          "parameters": {
+            "volume_threshold_ate": 10000,
+            "rho_at_threshold": 0.40,
+            "max_rho": 0.85,
+            "attestation_success_floor": 0.92
+          }
+        },
+        "timestamp": "2026-03-16T12:00:00Z",
+        "nonce": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+      },
+      "expected_response_status": "accepted",
+      "checks": {
+        "request_has_valid_nonce": true,
+        "request_has_valid_timestamp": true,
+        "request_has_valid_manifest": true,
+        "request_has_valid_policy": true,
+        "response_echoes_request_nonce": true,
+        "response_has_peering_id": true,
+        "response_has_own_manifest": true,
+        "response_has_own_policy": true
+      }
+    },
+    {
+      "id": "peer-002",
+      "description": "Replay attack — reused nonce should be rejected",
+      "request": {
+        "type": "PeeringRequest",
+        "initiator": {
+          "did": "did:web:exchange-a.example.org",
+          "name": "Exchange A",
+          "operator": "Operator A LLC"
+        },
+        "capability_manifest": {
+          "node_did": "did:web:exchange-a.example.org",
+          "supported_assets": ["a2a:ledger:ate"],
+          "attestation_types": ["ReputationAttestation"],
+          "policy_uri": "https://exchange-a.example.org/.well-known/a2a-trust-policy.json",
+          "endpoints": {
+            "verify": "https://exchange-a.example.org/federation/verify",
+            "peer": "https://exchange-a.example.org/federation/peer",
+            "health": "https://exchange-a.example.org/.well-known/a2a-federation-health",
+            "attestation_import": "https://exchange-a.example.org/federation/attestation/import"
+          }
+        },
+        "trust_discount_policy": {
+          "algorithm_id": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+          "initial_rho": 0.15,
+          "parameters": {}
+        },
+        "timestamp": "2026-03-16T12:00:00Z",
+        "nonce": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+      },
+      "context": "This nonce was already used in peer-001",
+      "expected_response_status": 400,
+      "expected_error": "nonce_reused"
+    },
+    {
+      "id": "peer-003",
+      "description": "Clock skew — timestamp too far in the past",
+      "request": {
+        "type": "PeeringRequest",
+        "initiator": {
+          "did": "did:web:exchange-a.example.org",
+          "name": "Exchange A",
+          "operator": "Operator A LLC"
+        },
+        "capability_manifest": {
+          "node_did": "did:web:exchange-a.example.org",
+          "supported_assets": ["a2a:ledger:ate"],
+          "attestation_types": ["ReputationAttestation"],
+          "policy_uri": "https://exchange-a.example.org/.well-known/a2a-trust-policy.json",
+          "endpoints": {
+            "verify": "https://exchange-a.example.org/federation/verify",
+            "peer": "https://exchange-a.example.org/federation/peer",
+            "health": "https://exchange-a.example.org/.well-known/a2a-federation-health",
+            "attestation_import": "https://exchange-a.example.org/federation/attestation/import"
+          }
+        },
+        "trust_discount_policy": {
+          "algorithm_id": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+          "initial_rho": 0.15,
+          "parameters": {}
+        },
+        "timestamp": "2026-03-16T11:50:00Z",
+        "nonce": "unique-nonce-for-skew-test-vector-003"
+      },
+      "context": "Server time is 2026-03-16T12:00:00Z, skew tolerance is ±5 minutes. Timestamp is 10 minutes old.",
+      "expected_response_status": 400,
+      "expected_error": "timestamp_skew"
+    },
+    {
+      "id": "peer-004",
+      "description": "Duplicate peering — already peered exchanges",
+      "request": {
+        "type": "PeeringRequest",
+        "initiator": {
+          "did": "did:web:exchange-a.example.org",
+          "name": "Exchange A",
+          "operator": "Operator A LLC"
+        },
+        "capability_manifest": {
+          "node_did": "did:web:exchange-a.example.org",
+          "supported_assets": ["a2a:ledger:ate"],
+          "attestation_types": ["ReputationAttestation"],
+          "policy_uri": "https://exchange-a.example.org/.well-known/a2a-trust-policy.json",
+          "endpoints": {
+            "verify": "https://exchange-a.example.org/federation/verify",
+            "peer": "https://exchange-a.example.org/federation/peer",
+            "health": "https://exchange-a.example.org/.well-known/a2a-federation-health",
+            "attestation_import": "https://exchange-a.example.org/federation/attestation/import"
+          }
+        },
+        "trust_discount_policy": {
+          "algorithm_id": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+          "initial_rho": 0.15,
+          "parameters": {}
+        },
+        "timestamp": "2026-03-16T12:05:00Z",
+        "nonce": "unique-nonce-for-duplicate-test-vector-004"
+      },
+      "context": "Exchange A and the receiving exchange are already peered from peer-001",
+      "expected_response_status": 409,
+      "expected_error": "peering_exists"
+    }
+  ]
+}

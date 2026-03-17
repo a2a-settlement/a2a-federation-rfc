@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/reputation-vc.json",
+  "title": "ReputationAttestation",
+  "description": "W3C Verifiable Credential for EMA reputation score. The primary VC type that crosses federation boundaries with Trust Discount applied.",
+  "type": "object",
+  "required": ["@context", "type", "id", "issuer", "validFrom", "validUntil", "credentialSubject", "proof"],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "https://www.w3.org/ns/credentials/v2" }
+    },
+    "type": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "ReputationAttestation" }
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^did:.+$"
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Max TTL: 90 days from validFrom."
+    },
+    "credentialSubject": {
+      "type": "object",
+      "required": ["id", "reputationScore", "algorithm", "parameters", "windowStart", "windowEnd"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:.+$",
+          "description": "DID of the agent."
+        },
+        "reputationScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "EMA reputation score."
+        },
+        "algorithm": {
+          "type": "string",
+          "description": "URN identifying the scoring algorithm.",
+          "examples": ["urn:a2a-settlement:ema-reputation:v1"]
+        },
+        "parameters": {
+          "type": "object",
+          "required": ["lambda", "taskCount", "disputeRate"],
+          "properties": {
+            "lambda": {
+              "type": "number",
+              "description": "EMA smoothing factor."
+            },
+            "taskCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of tasks in the scoring window."
+            },
+            "disputeRate": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Ratio of disputed to total tasks."
+            }
+          },
+          "additionalProperties": true
+        },
+        "windowStart": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Rolling window start."
+        },
+        "windowEnd": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Rolling window end."
+        }
+      },
+      "additionalProperties": false
+    },
+    "proof": {
+      "type": "object",
+      "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
+      "properties": {
+        "type": { "type": "string", "const": "Ed25519Signature2020" },
+        "created": { "type": "string", "format": "date-time" },
+        "verificationMethod": { "type": "string" },
+        "proofPurpose": { "type": "string", "const": "assertionMethod" },
+        "proofValue": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

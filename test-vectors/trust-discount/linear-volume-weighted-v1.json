@@ -1,0 +1,105 @@
+{
+  "algorithm": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+  "description": "Test vectors for the Linear Volume-Weighted v1 Trust Discount algorithm.",
+  "parameters": {
+    "volume_threshold_ate": 10000,
+    "rho_at_threshold": 0.40,
+    "max_rho": 0.85,
+    "attestation_success_floor": 0.92
+  },
+  "vectors": [
+    {
+      "id": "lvw-001",
+      "description": "All inputs zero → rho must be 0.0",
+      "inputs": {
+        "federation_age_days": 0,
+        "cross_exchange_volume_ate": 0.0,
+        "cross_exchange_tx_count": 0,
+        "attestation_success_rate": 1.0
+      },
+      "expected_rho": 0.0
+    },
+    {
+      "id": "lvw-002",
+      "description": "Early federation with small volume",
+      "inputs": {
+        "federation_age_days": 30,
+        "cross_exchange_volume_ate": 1000.0,
+        "cross_exchange_tx_count": 10,
+        "attestation_success_rate": 0.98
+      },
+      "expected_rho": 0.048,
+      "tolerance": 0.005
+    },
+    {
+      "id": "lvw-003",
+      "description": "Mid-term federation at half volume threshold",
+      "inputs": {
+        "federation_age_days": 90,
+        "cross_exchange_volume_ate": 5000.0,
+        "cross_exchange_tx_count": 50,
+        "attestation_success_rate": 0.95
+      },
+      "expected_rho": 0.225,
+      "tolerance": 0.005
+    },
+    {
+      "id": "lvw-004",
+      "description": "At volume threshold",
+      "inputs": {
+        "federation_age_days": 180,
+        "cross_exchange_volume_ate": 10000.0,
+        "cross_exchange_tx_count": 100,
+        "attestation_success_rate": 0.95
+      },
+      "expected_rho": 0.449,
+      "tolerance": 0.005
+    },
+    {
+      "id": "lvw-005",
+      "description": "Well above threshold — capped at max_rho",
+      "inputs": {
+        "federation_age_days": 365,
+        "cross_exchange_volume_ate": 100000.0,
+        "cross_exchange_tx_count": 1000,
+        "attestation_success_rate": 0.96
+      },
+      "expected_rho": 0.500,
+      "tolerance": 0.005
+    },
+    {
+      "id": "lvw-006",
+      "description": "Attestation success rate below floor → rho = 0",
+      "inputs": {
+        "federation_age_days": 365,
+        "cross_exchange_volume_ate": 100000.0,
+        "cross_exchange_tx_count": 1000,
+        "attestation_success_rate": 0.91
+      },
+      "expected_rho": 0.0
+    },
+    {
+      "id": "lvw-007",
+      "description": "Attestation rate exactly at floor",
+      "inputs": {
+        "federation_age_days": 180,
+        "cross_exchange_volume_ate": 10000.0,
+        "cross_exchange_tx_count": 100,
+        "attestation_success_rate": 0.92
+      },
+      "expected_rho": 0.449,
+      "tolerance": 0.005
+    },
+    {
+      "id": "lvw-008",
+      "description": "Attestation rate just below floor",
+      "inputs": {
+        "federation_age_days": 180,
+        "cross_exchange_volume_ate": 10000.0,
+        "cross_exchange_tx_count": 100,
+        "attestation_success_rate": 0.919
+      },
+      "expected_rho": 0.0
+    }
+  ]
+}

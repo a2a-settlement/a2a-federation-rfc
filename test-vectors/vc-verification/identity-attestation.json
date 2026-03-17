@@ -1,0 +1,107 @@
+{
+  "description": "Test vectors for IdentityAttestation VC verification.",
+  "vectors": [
+    {
+      "id": "vc-id-001",
+      "description": "Valid IdentityAttestation with all required fields",
+      "credential": {
+        "@context": [
+          "https://www.w3.org/ns/credentials/v2",
+          "https://a2a-settlement.org/ns/federation/v1"
+        ],
+        "type": ["VerifiableCredential", "IdentityAttestation"],
+        "id": "urn:uuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "issuer": "did:web:exchange.example.org",
+        "validFrom": "2026-01-01T00:00:00Z",
+        "validUntil": "2027-01-01T00:00:00Z",
+        "credentialSubject": {
+          "id": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+          "kyaLevel": 2,
+          "verificationMethod": "agent-card-attestation",
+          "exchangeAccountId": "agent-001"
+        },
+        "proof": {
+          "type": "Ed25519Signature2020",
+          "created": "2026-01-01T00:00:00Z",
+          "verificationMethod": "did:web:exchange.example.org#key-1",
+          "proofPurpose": "assertionMethod",
+          "proofValue": "PLACEHOLDER_SIGNATURE"
+        }
+      },
+      "checks": {
+        "schema_valid": true,
+        "has_required_context": true,
+        "has_required_type": true,
+        "valid_id_format": true,
+        "valid_issuer_did": true,
+        "valid_subject_did": true,
+        "ttl_within_max": true,
+        "kya_level_valid": true
+      }
+    },
+    {
+      "id": "vc-id-002",
+      "description": "Invalid: TTL exceeds 365-day max",
+      "credential": {
+        "@context": [
+          "https://www.w3.org/ns/credentials/v2",
+          "https://a2a-settlement.org/ns/federation/v1"
+        ],
+        "type": ["VerifiableCredential", "IdentityAttestation"],
+        "id": "urn:uuid:b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "issuer": "did:web:exchange.example.org",
+        "validFrom": "2026-01-01T00:00:00Z",
+        "validUntil": "2028-01-01T00:00:00Z",
+        "credentialSubject": {
+          "id": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+          "kyaLevel": 2,
+          "verificationMethod": "agent-card-attestation",
+          "exchangeAccountId": "agent-001"
+        },
+        "proof": {
+          "type": "Ed25519Signature2020",
+          "created": "2026-01-01T00:00:00Z",
+          "verificationMethod": "did:web:exchange.example.org#key-1",
+          "proofPurpose": "assertionMethod",
+          "proofValue": "PLACEHOLDER_SIGNATURE"
+        }
+      },
+      "checks": {
+        "schema_valid": true,
+        "ttl_within_max": false,
+        "expected_error": "validUntil exceeds maximum TTL of 365 days for IdentityAttestation"
+      }
+    },
+    {
+      "id": "vc-id-003",
+      "description": "Invalid: missing credentialSubject.kyaLevel",
+      "credential": {
+        "@context": [
+          "https://www.w3.org/ns/credentials/v2",
+          "https://a2a-settlement.org/ns/federation/v1"
+        ],
+        "type": ["VerifiableCredential", "IdentityAttestation"],
+        "id": "urn:uuid:c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "issuer": "did:web:exchange.example.org",
+        "validFrom": "2026-01-01T00:00:00Z",
+        "validUntil": "2027-01-01T00:00:00Z",
+        "credentialSubject": {
+          "id": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+          "verificationMethod": "agent-card-attestation",
+          "exchangeAccountId": "agent-001"
+        },
+        "proof": {
+          "type": "Ed25519Signature2020",
+          "created": "2026-01-01T00:00:00Z",
+          "verificationMethod": "did:web:exchange.example.org#key-1",
+          "proofPurpose": "assertionMethod",
+          "proofValue": "PLACEHOLDER_SIGNATURE"
+        }
+      },
+      "checks": {
+        "schema_valid": false,
+        "expected_error": "credentialSubject.kyaLevel is required"
+      }
+    }
+  ]
+}

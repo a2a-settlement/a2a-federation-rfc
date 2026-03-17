@@ -1,0 +1,96 @@
+openapi: "3.1.0"
+info:
+  title: A2A-SE Federation Well-Known Endpoints
+  version: "0.1.0"
+  description: |
+    Well-known endpoints for the A2A Settlement Exchange federation protocol.
+    These endpoints are publicly accessible (no authentication) and serve
+    machine-readable federation metadata.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://exchange.a2a-settlement.org
+    description: Reference implementation
+
+paths:
+  /.well-known/a2a-trust-policy.json:
+    get:
+      operationId: getTrustPolicy
+      summary: Get the exchange's Trust Discount policy
+      description: |
+        Returns the exchange's current Trust Discount policy, including the
+        algorithm identifier and parameters. This endpoint is machine-readable
+        and cacheable, enabling automated pre-flight checks without requiring
+        the algorithm registry to be online.
+      tags:
+        - Well-Known
+      responses:
+        "200":
+          description: Trust Discount policy
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, max-age=3600"
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/trust-discount-policy.json"
+              example:
+                algorithm_id: "urn:a2a:trust:discount:linear-volume-weighted-v1"
+                initial_rho: 0.15
+                parameters:
+                  volume_threshold_ate: 10000
+                  rho_at_threshold: 0.40
+                  max_rho: 0.85
+                  attestation_success_floor: 0.92
+                  review_cadence_days: 30
+
+  /.well-known/a2a-federation-health:
+    get:
+      operationId: getFederationHealth
+      summary: Get federation health telemetry
+      description: |
+        Returns the exchange's current operational status and health metrics.
+        Used by peer exchanges to monitor reliability and automatically adjust
+        Trust Discount rho values based on uptime.
+      tags:
+        - Well-Known
+      responses:
+        "200":
+          description: Federation health telemetry
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-cache"
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/federation-health.json"
+              example:
+                status: "operational"
+                node_did: "did:web:exchange.a2a-settlement.org"
+                avg_attestation_latency_ms: 45
+                uptime_90d: 0.9987
+                version: "0.10.0"
+                timestamp: "2026-03-16T12:00:00Z"
+                active_peers: 3
+                federation_protocol_version: "0.1.0"
+        "503":
+          description: Service unavailable (exchange is in maintenance mode)
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/federation-health.json"
+              example:
+                status: "maintenance"
+                node_did: "did:web:exchange.a2a-settlement.org"
+                avg_attestation_latency_ms: 0
+                uptime_90d: 0.9950
+                version: "0.10.0"
+                timestamp: "2026-03-16T12:00:00Z"
+                active_peers: 0
+                federation_protocol_version: "0.1.0"

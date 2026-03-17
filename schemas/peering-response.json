@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/peering-response.json",
+  "title": "PeeringResponse",
+  "description": "Signed response from a receiving exchange to a peering request.",
+  "type": "object",
+  "required": ["type", "status", "responder", "timestamp", "request_nonce", "proof"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "const": "PeeringResponse"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "pending_review", "rejected"],
+      "description": "Peering request outcome."
+    },
+    "responder": {
+      "type": "object",
+      "required": ["did", "name", "operator"],
+      "properties": {
+        "did": {
+          "type": "string",
+          "pattern": "^did:.+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_manifest": {
+      "$ref": "capability-manifest.json",
+      "description": "Included when status is 'accepted'."
+    },
+    "trust_discount_policy": {
+      "$ref": "trust-discount-policy.json",
+      "description": "Included when status is 'accepted'."
+    },
+    "peering_id": {
+      "type": "string",
+      "description": "Unique identifier for this peering relationship. Included when status is 'accepted'."
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the peering becomes active."
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Human-readable reason for rejection. Included when status is 'rejected'."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 32,
+      "description": "Response nonce."
+    },
+    "request_nonce": {
+      "type": "string",
+      "description": "Echo of the request nonce for correlation."
+    },
+    "proof": {
+      "type": "object",
+      "required": ["type", "verificationMethod", "proofValue"],
+      "properties": {
+        "type": { "type": "string", "const": "Ed25519Signature2020" },
+        "verificationMethod": { "type": "string" },
+        "proofValue": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

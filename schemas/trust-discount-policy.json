@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/trust-discount-policy.json",
+  "title": "TrustDiscountPolicy",
+  "description": "Trust Discount policy advertised by a federated exchange via /.well-known/a2a-trust-policy.json and during the peering handshake.",
+  "type": "object",
+  "required": ["algorithm_id", "initial_rho", "parameters"],
+  "properties": {
+    "algorithm_id": {
+      "type": "string",
+      "pattern": "^urn:a2a:trust:discount:.+$",
+      "description": "URN identifying the Trust Discount algorithm from the registry.",
+      "examples": [
+        "urn:a2a:trust:discount:linear-volume-weighted-v1",
+        "urn:a2a:trust:discount:step-function-v1",
+        "urn:a2a:trust:discount:exponential-decay-v1"
+      ]
+    },
+    "initial_rho": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Starting rho value for newly peered exchanges before any cross-exchange activity."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Algorithm-specific parameters. The schema depends on the algorithm_id.",
+      "properties": {
+        "volume_threshold_ate": {
+          "type": "number",
+          "minimum": 0,
+          "description": "ATE volume threshold at which rho reaches rho_at_threshold."
+        },
+        "rho_at_threshold": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Rho value when volume_threshold_ate is reached."
+        },
+        "max_rho": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Maximum achievable rho value for this peer relationship."
+        },
+        "attestation_success_floor": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Minimum attestation success rate required to maintain non-zero rho."
+        },
+        "review_cadence_days": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How often the Trust Discount parameters are reviewed."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

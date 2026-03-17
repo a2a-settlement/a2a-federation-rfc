@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/federation-health.json",
+  "title": "FederationHealth",
+  "description": "Health telemetry payload served at /.well-known/a2a-federation-health. Enables peer exchanges to monitor operational status and adjust trust levels.",
+  "type": "object",
+  "required": ["status", "node_did", "avg_attestation_latency_ms", "uptime_90d", "version", "timestamp", "federation_protocol_version"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["operational", "degraded", "maintenance"],
+      "description": "Current operational status."
+    },
+    "node_did": {
+      "type": "string",
+      "pattern": "^did:.+$",
+      "description": "The exchange's DID."
+    },
+    "avg_attestation_latency_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rolling average verification engine speed in milliseconds."
+    },
+    "uptime_90d": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "90-day rolling uptime percentage."
+    },
+    "version": {
+      "type": "string",
+      "description": "Exchange software version."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Current server time."
+    },
+    "active_peers": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of active federation peers."
+    },
+    "federation_protocol_version": {
+      "type": "string",
+      "description": "Supported federation protocol version.",
+      "examples": ["0.1.0"]
+    }
+  },
+  "additionalProperties": false
+}

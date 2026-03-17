@@ -1,0 +1,268 @@
+openapi: "3.1.0"
+info:
+  title: A2A-SE Federation API
+  version: "0.1.0"
+  description: |
+    Federation API endpoints for the A2A Settlement Exchange federation protocol.
+    These endpoints enable peering, verification, and attestation import between
+    federated exchanges.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://exchange.a2a-settlement.org
+    description: Reference implementation
+
+paths:
+  /federation/peer:
+    post:
+      operationId: peeringHandshake
+      summary: Initiate or respond to a federation peering handshake
+      description: |
+        Establishes a cryptographic trust relationship between two exchanges.
+        Both exchanges verify each other's identity, exchange capability manifests,
+        and advertise Trust Discount policies. Requires mutual cryptographic consent.
+      tags:
+        - Federation
+      security:
+        - FederationAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/peering-request.json"
+      responses:
+        "200":
+          description: Peering accepted or pending review
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/peering-response.json"
+        "400":
+          description: Invalid request (malformed payload, expired nonce, clock skew)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Signature verification failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Peering relationship already exists (use re-peering flow)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /federation/verify:
+    post:
+      operationId: verifyCredential
+      summary: Verify a Verifiable Credential presented by a federated agent
+      description: |
+        Verifies the cryptographic signature and validity of a VC issued by a
+        federated exchange. Resolves the issuer's DID, checks the signature,
+        and validates the credential's TTL and revocation status.
+      tags:
+        - Federation
+      security:
+        - FederationAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - verifiable_credential
+              properties:
+                verifiable_credential:
+                  type: object
+                  description: The W3C Verifiable Credential to verify
+                agent_did:
+                  type: string
+                  pattern: "^did:.+$"
+                  description: Expected agent DID (for subject matching)
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - valid
+                  - issuer_did
+                  - credential_type
+                properties:
+                  valid:
+                    type: boolean
+                    description: Whether the VC passed all verification checks
+                  issuer_did:
+                    type: string
+                    description: DID of the issuing exchange
+                  credential_type:
+                    type: string
+                    description: The specific VC type
+                  peer_rho:
+                    type: number
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Current Trust Discount rho for the issuing exchange
+                  verification_details:
+                    type: object
+                    properties:
+                      signature_valid:
+                        type: boolean
+                      not_expired:
+                        type: boolean
+                      not_revoked:
+                        type: boolean
+                      issuer_is_peer:
+                        type: boolean
+                      subject_matches:
+                        type: boolean
+                  denial_reasons:
+                    type: array
+                    items:
+                      type: string
+                    description: Reasons for verification failure (if valid is false)
+        "400":
+          description: Invalid credential format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /federation/attestation/import:
+    post:
+      operationId: importAttestations
+      summary: Import cross-exchange attestation VCs
+      description: |
+        Imports one or more Verifiable Credentials from a federated exchange.
+        Each VC is verified, the Trust Discount is applied, and the effective
+        reputation is stored for the agent.
+      tags:
+        - Federation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - agent_did
+                - attestations
+              properties:
+                agent_did:
+                  type: string
+                  pattern: "^did:.+$"
+                  description: DID of the agent presenting the attestations
+                attestations:
+                  type: array
+                  items:
+                    type: object
+                    description: W3C Verifiable Credential
+                  minItems: 1
+                  maxItems: 50
+                  description: Array of VCs to import
+      responses:
+        "200":
+          description: Import results
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - imported
+                  - results
+                properties:
+                  imported:
+                    type: integer
+                    description: Number of successfully imported attestations
+                  rejected:
+                    type: integer
+                    description: Number of rejected attestations
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - attestation_id
+                        - status
+                      properties:
+                        attestation_id:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                            - accepted
+                            - rejected
+                            - duplicate
+                        source_exchange:
+                          type: string
+                          description: DID of the issuing exchange
+                        native_reputation:
+                          type: number
+                          description: Original reputation score from the VC
+                        trust_discount_rho:
+                          type: number
+                          description: Applied Trust Discount rho
+                        effective_reputation:
+                          type: number
+                          description: Reputation after Trust Discount
+                        rejection_reason:
+                          type: string
+                          description: Why the attestation was rejected
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    FederationAuth:
+      type: http
+      scheme: bearer
+      description: Federation JWT with federation scopes
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Standard settlement auth JWT
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error context

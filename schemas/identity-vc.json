@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/identity-vc.json",
+  "title": "IdentityAttestation",
+  "description": "W3C Verifiable Credential for KYA identity verification. Issued by an exchange upon completing KYA verification of an agent.",
+  "type": "object",
+  "required": ["@context", "type", "id", "issuer", "validFrom", "validUntil", "credentialSubject", "proof"],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "https://www.w3.org/ns/credentials/v2" },
+      "description": "Must include W3C VC v2 and A2A-SE federation context."
+    },
+    "type": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "const": "IdentityAttestation" },
+      "description": "Must include 'VerifiableCredential' and 'IdentityAttestation'."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "Globally unique URN (UUID v4)."
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^did:.+$",
+      "description": "DID of the issuing exchange."
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of validity period."
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of validity period. Max TTL: 365 days from validFrom."
+    },
+    "credentialSubject": {
+      "type": "object",
+      "required": ["id", "kyaLevel", "verificationMethod", "exchangeAccountId"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:.+$",
+          "description": "DID of the agent."
+        },
+        "kyaLevel": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "KYA verification level."
+        },
+        "verificationMethod": {
+          "type": "string",
+          "description": "How identity was verified (e.g., 'agent-card-signature', 'agent-card-attestation')."
+        },
+        "exchangeAccountId": {
+          "type": "string",
+          "description": "Agent's account ID on the issuing exchange."
+        }
+      },
+      "additionalProperties": false
+    },
+    "proof": {
+      "$ref": "#/$defs/Ed25519Proof"
+    }
+  },
+  "$defs": {
+    "Ed25519Proof": {
+      "type": "object",
+      "required": ["type", "created", "verificationMethod", "proofPurpose", "proofValue"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "Ed25519Signature2020"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verificationMethod": {
+          "type": "string",
+          "description": "DID URL of the signing key."
+        },
+        "proofPurpose": {
+          "type": "string",
+          "const": "assertionMethod"
+        },
+        "proofValue": {
+          "type": "string",
+          "description": "Base58btc-encoded Ed25519 signature."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

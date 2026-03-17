@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-settlement.org/schemas/federation/capability-manifest.json",
+  "title": "CapabilityManifest",
+  "description": "Five-field MVP capability manifest exchanged during the /federation/peer handshake. Declares an exchange's federation capabilities for automated compatibility checking.",
+  "type": "object",
+  "required": ["node_did", "supported_assets", "attestation_types", "policy_uri", "endpoints"],
+  "properties": {
+    "node_did": {
+      "type": "string",
+      "pattern": "^did:(web|key):.+$",
+      "description": "The exchange's own decentralized identifier.",
+      "examples": ["did:web:exchange.a2a-settlement.org"]
+    },
+    "supported_assets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "Settlement tokens the exchange can custody. Uses CAIP-19 for chain-based assets or 'a2a:ledger:ate' for ledger-based.",
+      "examples": [["a2a:ledger:ate", "eip155:8453/erc20/0xATE_ADDRESS"]]
+    },
+    "attestation_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "IdentityAttestation",
+          "CapabilityAttestation",
+          "ReputationAttestation",
+          "EvidenceAttestation",
+          "TransactionAttestation"
+        ]
+      },
+      "minItems": 1,
+      "description": "VC types this exchange can issue and verify."
+    },
+    "policy_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for the exchange's active Trust Discount policy (/.well-known/a2a-trust-policy.json)."
+    },
+    "endpoints": {
+      "type": "object",
+      "required": ["verify", "peer", "health", "attestation_import"],
+      "properties": {
+        "verify": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the /federation/verify endpoint."
+        },
+        "peer": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the /federation/peer endpoint."
+        },
+        "health": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the /.well-known/a2a-federation-health endpoint."
+        },
+        "attestation_import": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the /federation/attestation/import endpoint."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

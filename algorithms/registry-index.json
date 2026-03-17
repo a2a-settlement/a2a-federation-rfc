@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A2A-SE Trust Discount Algorithm Registry",
+  "description": "Append-only registry of approved Trust Discount algorithm URNs. Follows the IANA registry model. Deprecated algorithms are marked but never removed.",
+  "version": "0.1.0",
+  "registry": [
+    {
+      "urn": "urn:a2a:trust:discount:linear-volume-weighted-v1",
+      "name": "Linear Volume-Weighted v1",
+      "status": "active",
+      "specification": "linear-volume-weighted-v1.md",
+      "added": "2026-03-16",
+      "authors": ["Truthsetter LLC"],
+      "summary": "Rho increases linearly with cross-exchange settlement volume, gated by attestation success rate."
+    },
+    {
+      "urn": "urn:a2a:trust:discount:step-function-v1",
+      "name": "Step Function v1",
+      "status": "active",
+      "specification": "step-function-v1.md",
+      "added": "2026-03-16",
+      "authors": ["Truthsetter LLC"],
+      "summary": "Rho increases in discrete steps as federation milestones are reached."
+    },
+    {
+      "urn": "urn:a2a:trust:discount:exponential-decay-v1",
+      "name": "Exponential Decay v1",
+      "status": "active",
+      "specification": "exponential-decay-v1.md",
+      "added": "2026-03-16",
+      "authors": ["Truthsetter LLC"],
+      "summary": "Rho approaches max asymptotically with diminishing returns on additional volume."
+    }
+  ]
+}
